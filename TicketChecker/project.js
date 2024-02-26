@@ -63,6 +63,7 @@ function handleSubmit(ticketPriority, input1, input2) {
     console.log("Duration:", input1 + " minutes");
     console.log("Delay:", input2 + " seconds");
 
+    printScript(ticketPriority, input1, input2)
     checkTicketPresence(ticketPriority, input1, input2);
 }
 
@@ -73,37 +74,63 @@ var popupWindow = createInputWindow();
 var popup = window.open('', '_blank', 'width=400,height=300');
 popup.document.body.appendChild(popupWindow);
 
+/*
     function convertPriorityToClassName(priority) {
 
     }
+*/
 
     // Ticket checking function
-    function checkTicketPresence(className, duration, delay) {
+    function checkTicketPresence(className, priority, duration, delay) {
     duration = duration*60;
     var attempts = 0;
     var maxAttempts = duration/delay;
 
         console.log("duration:" + duration);
         console.log("max" + maxAttempts);
+        console.log("Priority: " + priority);
 
-    function check() {
-        var divs = document.getElementsByClassName(className);
+        priority = priority.toLowerCase();
 
-        if (divs.length > 0) {
-            console.log("Element with class '" + className + "' is present.");
-            return true;
-        } else {
-            attempts++;
-            if (attempts < maxAttempts) {
-                console.log("Element with class '" + className + "' is not present. Attempt: " + attempts);
-                setTimeout(check, delay * 1000);
-            } else {
-                console.log("Loop stopped, time expired. Ticket with priority '" + className + "' was not present.");
-                return false;
+    for(var i = 0; i < maxAttempts; i++) {
+        checkIfChildrenContainsTicket(className, priority);
+    }
+
+    function getChildsFromClass(className) { //db
+        var elements = document.getElementsByClassName(className);
+        var allChildren = [];
+        
+        for (var i = 0; i < elements.length; i++) {
+            var currentElement = elements[i];
+    
+            var children = currentElement.children;
+    
+            for (var j = 0; j < children.length; j++) {
+                allChildren.push(children[j]);
+            }
+        }
+        return allChildren;
+    }
+
+    function checkIfChildrenContainsTicket(className, priority) {
+        var children = [];
+        children = getChildsFromClass(className);
+        
+        for (var i = 0; i < children.length; i++) {
+    
+            if (children[i].tagName.toLowerCase() === 'span' && children[i].innerHTML === priority) {
+                console.log("Is present");
+                alert("Ticket wirh priority: " + priority + ", is present!");
+                return true; // <span> child is present
             }
         }
     }
+}
 
-    // Start the checking process
-    check();
+if (attempts < maxAttempts) {
+    console.log("Element with class '" + className + "' is not present. Attempt: " + attempts);
+    setTimeout(check, delay * 1000);
+} else {
+    console.log("Loop stopped, time expired. Ticket with priority '" + className + "' was not present.");
+    return false;
 }
